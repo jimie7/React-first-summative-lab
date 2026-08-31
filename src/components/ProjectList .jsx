@@ -1,39 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProjectCard from "./ProjectCard";
-
-const projects = [
-  {
-    id: 1,
-    title: "E-Commerce Website",
-    description: "A modern online shopping platform for a fashion brand.",
-    technologies: ["React", "CSS", "JavaScript"],
-  },
-  {
-    id: 2,
-    title: "Restaurant Website",
-    description: "A responsive website for a local restaurant.",
-    technologies: ["HTML", "CSS", "JavaScript"],
-  },
-  {
-    id: 3,
-    title: "Portfolio Website",
-    description: "A personal portfolio website showcasing creative work.",
-    technologies: ["React", "Tailwind CSS"],
-  },
-  {
-    id: 4,
-    title: "Mobile Banking App",
-    description: "A simple and secure interface for managing finances.",
-    technologies: ["React Native", "JavaScript"],
-  },
-];
 
 function ProjectList() {
   const [search, setSearch] = useState("");
-  const [list, setList] = useState(projects);
+  const [list, setList] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [technologies, setTechnologies] = useState("");
+
+  useEffect(() => {
+    fetch("http://localhost:3000/projects")
+      .then((res) => res.json())
+      .then((data) => setList(data));
+  }, []);
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -44,11 +23,18 @@ function ProjectList() {
       description,
       technologies: technologies.split(",").map((tech) => tech.trim()),
     };
-    setList([...list, newProject]);
-
-    setTitle("");
-    setDescription("");
-    setTechnologies("");
+    fetch("http://localhost:3000/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newProject),
+    })
+      .then((res) => res.json())
+      .then((createdProject) => {
+        setList([...list, createdProject]);
+        setTitle("");
+        setDescription("");
+        setTechnologies("");
+      });
   }
 
   const filteredProjects = list.filter((project) =>
